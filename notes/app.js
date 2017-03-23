@@ -50,7 +50,7 @@ Vue.component('note', {
 Vue.component('modified', {
   props: ['isModified'],
   render: function (h) {
-    return h('span', this.isModified ? 'Modified' : 'Saved')
+    return h('span', this.isModified ? 'Saving...' : 'Saved')
   },
   updated: function () {
     if (!this.isModified) return
