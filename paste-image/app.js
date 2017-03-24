@@ -3,6 +3,7 @@
 
 var s2 = new S2('https://s2.unlessquit.com')
 
+// TODO: Move to s2.js
 S2.prototype.store = function (key, value, options, callback) {
   var req = new XMLHttpRequest()
   req.addEventListener('load', function () {
@@ -40,13 +41,13 @@ var app = new Vue({
       'div', {attrs: {id: 'app'},
               on: {paste: this.onPaste}},
       [
-        this.imageId
-          ? h('div', {attrs: {id: 'image'}}, [
+        this.imageId ?
+          h('div', {attrs: {id: 'image'}}, [
             h('img', {attrs: {src: this.imageUrl}}),
             h('br'),
             h('a', {attrs: {href: this.imageUrl}}, this.imageUrl)
           ])
-          : h('div', {attrs: {id: 'paste'}}, 'Paste Image')
+        : h('div', {attrs: {id: 'paste'}}, 'Paste Image')
       ])
   },
   computed: {
