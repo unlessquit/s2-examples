@@ -12,7 +12,7 @@ S2.prototype.store = function (key, value, options, callback) {
     }
 
     if (callback) {
-      callback(null, this.responseText)
+      callback(null, this.responseText.trim())
     }
   })
   req.open('PUT', this.serverUrl + key)
