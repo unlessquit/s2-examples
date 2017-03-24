@@ -78,7 +78,6 @@ var app = new Vue({
 
             console.log('Stored as', id)
             this.imageId = id
-            this.imageType = item.type
             document.location.hash = id
           }
         )
