@@ -32,6 +32,8 @@ Vue.component('server-audio', {
   },
   mounted: function () {
     this.$audio.elm.oncanplaythrough = () => this.$audio.elm.play()
+    this.$audio.elm.onended = () => this.$emit('ended')
+    this.$audio.elm.onerror = () => this.$emit('ended')
     this.$audio.elm.src = audioUrl
   }
 })
@@ -53,6 +55,7 @@ var app = new Vue({
   data: {
     notSupported: false,
     mediaRecorder: null,
+    isPlaying: true,
     isRecording: false,
     chunks: [],
     audioType: null
@@ -62,17 +65,22 @@ var app = new Vue({
       'div', {attrs: {id: 'app'}},
       this.notSupported
         ? [h('div', {attrs: {id: 'record'}}, ':/')]
-        : [h('server-audio'),
+        : [h('server-audio', {on: {ended: this.onEndedPlaying}}),
            this.audio && h('my-audio', {props: {audio: this.audio}}),
            h('div', {attrs: {id: 'record'},
                      on: {mousedown: this.startRecording,
                           mouseup: this.stopRecording,
                           mouseout: this.stopRecording}},
-             this.isRecording ? 'Recording...' : 'Push to record'),
+             this.buttonMessage),
            h('span', 'Record message which will be played to others when they visit this page.')
           ])
   },
   computed: {
+    buttonMessage: function () {
+      if (this.isPlaying) return 'Playing...'
+      if (this.isRecording) return 'Recording...'
+      return 'Push to record'
+    },
     audio: function () {
       if (this.isRecording) return null
       if (this.chunks.length === 0) return null
@@ -93,6 +101,9 @@ var app = new Vue({
 
       this.mediaRecorder.stop()
       this.isRecording = false
+    },
+    onEndedPlaying: function (e) {
+      this.isPlaying = false
     },
     onAudioChunk: function (e) {
       console.log('Recording: ', e.type)
