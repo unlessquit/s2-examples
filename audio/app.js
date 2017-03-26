@@ -29,7 +29,7 @@ S2.prototype.store = function (key, value, options, callback) {
 Vue.component('server-audio', {
   data: () => {
     return {
-      isLoaded: false,
+      isLoaded: true,
       isPlaying: false
     }
   },
