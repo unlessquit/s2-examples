@@ -72,7 +72,9 @@ Vue.component('record-button', {
   render: function (h) {
     return h('div', {attrs: {id: 'record'}}, [
       h('div', {attrs: {id: 'button'},
-                on: {mousedown: this.startRecording,
+                on: {touchstart: this.startRecording,
+                     touchend: this.stopRecording,
+                     mousedown: this.startRecording,
                      mouseup: this.stopRecording,
                      mouseout: this.stopRecording}},
         this.buttonMessage),
@@ -88,6 +90,7 @@ Vue.component('record-button', {
   },
   methods: {
     startRecording: function (e) {
+      e.preventDefault()
       // 150ms delay so that we don't record mouse click
       setTimeout(() => this.mediaRecorder.start(), 150)
       this.chunks = []
@@ -95,6 +98,7 @@ Vue.component('record-button', {
       this.mediaRecorder.ondataavailable = this.onAudioChunk
     },
     stopRecording: function (e) {
+      e.preventDefault()
       if (!this.isRecording) return
 
       this.mediaRecorder.stop()
