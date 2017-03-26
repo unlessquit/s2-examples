@@ -27,14 +27,37 @@ S2.prototype.store = function (key, value, options, callback) {
 }
 
 Vue.component('server-audio', {
+  data: () => {
+    return {
+      isLoaded: false,
+      isPlaying: false
+    }
+  },
   render: function (h) {
-    return this.$audio = h('audio')
+    var content = this.isPlaying
+        ? 'Playing...'
+        : this.isLoaded
+        ? h('div', {attrs: {id: 'button'},
+                    on: {click: this.play}},
+            'Click to play')
+        : 'Loading...';
+
+    return h('div', {}, [
+      content,
+      this.$audio = h('audio')
+    ])
   },
   mounted: function () {
-    this.$audio.elm.oncanplaythrough = () => this.$audio.elm.play()
+    this.$audio.elm.oncanplaythrough = () => this.isLoaded = true
     this.$audio.elm.onended = () => this.$emit('ended')
     this.$audio.elm.onerror = () => this.$emit('ended')
     this.$audio.elm.src = audioUrl
+  },
+  methods: {
+    play: function () {
+      this.$audio.elm.play()
+      this.isPlaying = true
+    }
   }
 })
 
@@ -149,7 +172,7 @@ var app = new Vue({
         ? [h('div', {attrs: {id: 'record'}}, ':/')]
         : [h('local-audio', {props: {recordedAudio: this.recordedAudio}}),
            this.isPlayingServerAudio
-             ? [h('server-audio', {on: {ended: this.onEndedPlaying}}), 'Playing...']
+             ? [h('server-audio', {on: {ended: this.onEndedPlaying}})]
              : h('record-button', {props: {mediaRecorder: this.mediaRecorder},
                                    on: {recorded: this.onRecorded}})])
   },
