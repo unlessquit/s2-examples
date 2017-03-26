@@ -68,7 +68,8 @@ var app = new Vue({
                      on: {mousedown: this.startRecording,
                           mouseup: this.stopRecording,
                           mouseout: this.stopRecording}},
-             this.isRecording ? 'Recording...' : 'Push to record')
+             this.isRecording ? 'Recording...' : 'Push to record'),
+           h('span', 'Record message which will be played to others when they visit this page.')
           ])
   },
   computed: {
