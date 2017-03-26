@@ -39,53 +39,50 @@ Vue.component('server-audio', {
 })
 
 Vue.component('my-audio', {
-  props: ['recordedAudio', 'src'],
+  // TODO: find out why counter is required here to trigger update
+  props: ['recordedAudio', 'counter'],
   render: function (h) {
     this.$audio = h('audio')
     return this.$audio
   },
   mounted: function () {
-    this.$audio.elm.src = window.URL.createObjectURL(this.recordedAudio)
-    this.$audio.elm.play()
+    this.play()
+  },
+  updated: function () {
+    this.play()
+  },
+  methods: {
+    play: function () {
+      if (!recordedAudio) return
+      this.$audio.elm.src = window.URL.createObjectURL(this.recordedAudio.data)
+      this.$audio.elm.play()
+    }
   }
 })
 
-var app = new Vue({
-  el: '#app',
-  data: {
-    notSupported: false,
-    mediaRecorder: null,
-    isPlaying: true,
-    isRecording: false,
-    chunks: [],
-    audioType: null
+Vue.component('record-button', {
+  props: ['mediaRecorder'],
+  data: () => {
+    return {
+      chunks: [],
+      isRecording: false
+    }
   },
   render: function (h) {
-    return h(
-      'div', {attrs: {id: 'app'}},
-      this.notSupported
-        ? [h('div', {attrs: {id: 'record'}}, ':/')]
-        : [h('server-audio', {on: {ended: this.onEndedPlaying}}),
-           this.recordedAudio && h('my-audio', {props: {recordedAudio: this.recordedAudio}}),
-           h('div', {attrs: {id: 'button'},
-                     on: {mousedown: this.startRecording,
-                          mouseup: this.stopRecording,
-                          mouseout: this.stopRecording}},
-             this.buttonMessage),
-           h('span', 'Record message which will be played to others when they visit this page.')
-          ])
+    return h('div', {attrs: {id: 'record'}}, [
+      h('div', {attrs: {id: 'button'},
+                on: {mousedown: this.startRecording,
+                     mouseup: this.stopRecording,
+                     mouseout: this.stopRecording}},
+        this.buttonMessage),
+      h('span', 'Record message which will be played to others when they visit this page.')
+    ])
   },
   computed: {
     buttonMessage: function () {
-      if (this.isPlaying) return 'Playing...'
       if (this.isRecording) return 'Recording...'
-      return 'Push to record'
-    },
-    recordedAudio: function () {
-      if (this.isRecording) return null
-      if (this.chunks.length === 0) return null
 
-      return new Blob(this.chunks, {type: this.recordedAudioType})
+      return 'Push to record'
     }
   },
   methods: {
@@ -102,19 +99,22 @@ var app = new Vue({
       this.mediaRecorder.stop()
       this.isRecording = false
     },
-    onEndedPlaying: function (e) {
-      this.isPlaying = false
-    },
     onAudioChunk: function (e) {
-      console.log('Recording: ', e.type)
-      this.recordedAudioType = e.type
+      console.log('Recording: ', e.data.type)
       this.chunks.push(e.data)
 
       if (!this.isRecording) {
+        var recording = {
+          type: e.data.type,
+          data: new Blob(this.chunks, {type: e.data.type})
+        }
+
+        this.$emit('recorded', recording)
+
         s2.store(
           audioPath,
-          this.recordedAudio,
-          {'content-type': this.recordedAudioType},
+          recording.data,
+          {'content-type': recording.type},
           (err, id) => {
             if (err) {
               console.error('Failed to upload audio', err);
@@ -125,6 +125,38 @@ var app = new Vue({
           }
         )
       }
+    }
+  }
+})
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    notSupported: false,
+    mediaRecorder: null,
+    isPlayingServerAudio: true,
+    recordedAudio: null,
+    counter: 0
+  },
+  render: function (h) {
+    return h(
+      'div', {attrs: {id: 'app'}},
+      this.notSupported
+        ? [h('div', {attrs: {id: 'record'}}, ':/')]
+        : [h('my-audio', {props: {recordedAudio: this.recordedAudio,
+                                counter: this.counter}}),
+           this.isPlayingServerAudio
+             ? [h('server-audio', {on: {ended: this.onEndedPlaying}}), 'Playing...']
+             : h('record-button', {props: {mediaRecorder: this.mediaRecorder},
+                                   on: {recorded: this.onRecorded}})])
+  },
+  methods: {
+    onRecorded: function (e) {
+      this.counter = this.counter + 1
+      this.recordedAudio = e
+    },
+    onEndedPlaying: function (e) {
+      this.isPlayingServerAudio = false
     }
   }
 })
