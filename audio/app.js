@@ -39,13 +39,13 @@ Vue.component('server-audio', {
 })
 
 Vue.component('my-audio', {
-  props: ['audio', 'src'],
+  props: ['recordedAudio', 'src'],
   render: function (h) {
     this.$audio = h('audio')
     return this.$audio
   },
   mounted: function () {
-    this.$audio.elm.src = window.URL.createObjectURL(this.audio)
+    this.$audio.elm.src = window.URL.createObjectURL(this.recordedAudio)
     this.$audio.elm.play()
   }
 })
@@ -66,8 +66,8 @@ var app = new Vue({
       this.notSupported
         ? [h('div', {attrs: {id: 'record'}}, ':/')]
         : [h('server-audio', {on: {ended: this.onEndedPlaying}}),
-           this.audio && h('my-audio', {props: {audio: this.audio}}),
-           h('div', {attrs: {id: 'record'},
+           this.recordedAudio && h('my-audio', {props: {recordedAudio: this.recordedAudio}}),
+           h('div', {attrs: {id: 'button'},
                      on: {mousedown: this.startRecording,
                           mouseup: this.stopRecording,
                           mouseout: this.stopRecording}},
@@ -81,11 +81,11 @@ var app = new Vue({
       if (this.isRecording) return 'Recording...'
       return 'Push to record'
     },
-    audio: function () {
+    recordedAudio: function () {
       if (this.isRecording) return null
       if (this.chunks.length === 0) return null
 
-      return new Blob(this.chunks, {type: this.audioType})
+      return new Blob(this.chunks, {type: this.recordedAudioType})
     }
   },
   methods: {
@@ -107,14 +107,14 @@ var app = new Vue({
     },
     onAudioChunk: function (e) {
       console.log('Recording: ', e.type)
-      this.audioType = e.type
+      this.recordedAudioType = e.type
       this.chunks.push(e.data)
 
       if (!this.isRecording) {
         s2.store(
           audioPath,
-          this.audio,
-          {'content-type': this.audioType},
+          this.recordedAudio,
+          {'content-type': this.recordedAudioType},
           (err, id) => {
             if (err) {
               console.error('Failed to upload audio', err);
