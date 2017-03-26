@@ -48,7 +48,7 @@ Vue.component('server-audio', {
     ])
   },
   mounted: function () {
-    this.$audio.elm.oncanplaythrough = () => this.isLoaded = true
+    this.$audio.elm.oncanplay = () => this.isLoaded = true
     this.$audio.elm.onended = () => this.$emit('ended')
     this.$audio.elm.onerror = () => this.$emit('ended')
     this.$audio.elm.src = audioUrl
