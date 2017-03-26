@@ -38,12 +38,13 @@ Vue.component('server-audio', {
   }
 })
 
-Vue.component('my-audio', {
-  // TODO: find out why counter is required here to trigger update
-  props: ['recordedAudio', 'counter'],
+Vue.component('local-audio', {
+  props: ['recordedAudio'],
   render: function (h) {
-    this.$audio = h('audio')
-    return this.$audio
+    if (this.recordedAudio) {
+      console.log('Going to play recorded audio');
+    }
+    return this.$audio = h('audio')
   },
   mounted: function () {
     this.play()
@@ -53,7 +54,7 @@ Vue.component('my-audio', {
   },
   methods: {
     play: function () {
-      if (!recordedAudio) return
+      if (!this.recordedAudio) return
       this.$audio.elm.src = window.URL.createObjectURL(this.recordedAudio.data)
       this.$audio.elm.play()
     }
@@ -135,16 +136,14 @@ var app = new Vue({
     notSupported: false,
     mediaRecorder: null,
     isPlayingServerAudio: true,
-    recordedAudio: null,
-    counter: 0
+    recordedAudio: null
   },
   render: function (h) {
     return h(
       'div', {attrs: {id: 'app'}},
       this.notSupported
         ? [h('div', {attrs: {id: 'record'}}, ':/')]
-        : [h('my-audio', {props: {recordedAudio: this.recordedAudio,
-                                counter: this.counter}}),
+        : [h('local-audio', {props: {recordedAudio: this.recordedAudio}}),
            this.isPlayingServerAudio
              ? [h('server-audio', {on: {ended: this.onEndedPlaying}}), 'Playing...']
              : h('record-button', {props: {mediaRecorder: this.mediaRecorder},
@@ -152,7 +151,6 @@ var app = new Vue({
   },
   methods: {
     onRecorded: function (e) {
-      this.counter = this.counter + 1
       this.recordedAudio = e
     },
     onEndedPlaying: function (e) {
