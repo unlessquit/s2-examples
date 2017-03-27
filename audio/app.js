@@ -37,7 +37,7 @@ Vue.component('server-audio', {
     var content = this.isPlaying
         ? 'Playing...'
         : this.isLoaded
-        ? h('div', {attrs: {id: 'button'},
+        ? h('div', {attrs: {'class': 'button play'},
                     on: {click: this.play}},
             'Click to play')
         : 'Loading...';
@@ -94,7 +94,7 @@ Vue.component('record-button', {
   },
   render: function (h) {
     return h('div', {attrs: {id: 'record'}}, [
-      h('div', {attrs: {id: 'button'},
+      h('div', {attrs: {'class': 'button'},
                 on: {touchstart: this.startRecording,
                      touchend: this.stopRecording,
                      mousedown: this.startRecording,
