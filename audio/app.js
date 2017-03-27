@@ -1,6 +1,7 @@
 /* eslint-env browser */
 /* global Vue, S2 */
 
+var $player = document.getElementById('player')
 var s2 = new S2('https://s2.unlessquit.com')
 
 var audioPath = '/examples/audio'
@@ -26,60 +27,20 @@ S2.prototype.store = function (key, value, options, callback) {
   req.send(value)
 }
 
-Vue.component('server-audio', {
-  data: () => {
-    return {
-      isLoaded: true,
-      isPlaying: false
-    }
-  },
+Vue.component('audio-player', {
+  props: ['element', 'src'],
   render: function (h) {
-    var content = this.isPlaying
-        ? 'Playing...'
-        : this.isLoaded
-        ? h('div', {attrs: {'class': 'button play'},
-                    on: {click: this.play}},
-            'Click to play')
-        : 'Loading...';
-
-    return h('div', {}, [
-      content,
-      this.$audio = h('audio')
-    ])
+    this.element.src = this.src
+    return h('div')
   },
-  mounted: function () {
-    this.$audio.elm.oncanplay = () => this.isLoaded = true
-    this.$audio.elm.onended = () => this.$emit('ended')
-    this.$audio.elm.onerror = () => this.$emit('ended')
-    this.$audio.elm.src = audioUrl
-  },
+  mounted: function () { this.bind() },
+  updated: function () { this.bind() },
   methods: {
-    play: function () {
-      this.$audio.elm.play()
-      this.isPlaying = true
-    }
-  }
-})
-
-Vue.component('local-audio', {
-  props: ['recordedAudio'],
-  render: function (h) {
-    if (this.recordedAudio) {
-      console.log('Going to play recorded audio');
-    }
-    return this.$audio = h('audio')
-  },
-  mounted: function () {
-    this.play()
-  },
-  updated: function () {
-    this.play()
-  },
-  methods: {
-    play: function () {
-      if (!this.recordedAudio) return
-      this.$audio.elm.src = window.URL.createObjectURL(this.recordedAudio.data)
-      this.$audio.elm.play()
+    bind: function () {
+      this.element.src = this.src
+      this.element.onplaying = () => this.$emit('started')
+      this.element.onended = () => this.$emit('ended')
+      this.element.onerror = () => this.$emit('ended')
     }
   }
 })
@@ -157,31 +118,61 @@ Vue.component('record-button', {
   }
 })
 
+Vue.component('play-button', {
+  render: function (h) {
+    return h('div', {attrs: {'class': 'button play'},
+                     on: {click: this.onClick}},
+             'Click to play')
+  },
+  methods: {
+    onClick: function () {
+      this.$emit('click')
+    }
+  }
+})
+
 var app = new Vue({
   el: '#app',
   data: {
     notSupported: false,
     mediaRecorder: null,
-    isPlayingServerAudio: true,
-    recordedAudio: null
+    isFirstPlay: true,
+    isPlaying: false,
+    recordedAudio: null,
+    playUrl: audioUrl
   },
   render: function (h) {
     return h(
       'div', {attrs: {id: 'app'}},
-      this.notSupported
-        ? [h('div', {attrs: {id: 'record'}}, ':/')]
-        : [h('local-audio', {props: {recordedAudio: this.recordedAudio}}),
-           this.isPlayingServerAudio
-             ? [h('server-audio', {on: {ended: this.onEndedPlaying}})]
-             : h('record-button', {props: {mediaRecorder: this.mediaRecorder},
-                                   on: {recorded: this.onRecorded}})])
+      (this.notSupported
+       ? [h('div', {attrs: {id: 'record'}}, ':/')]
+       : [h('audio-player', {props: {src: this.playUrl,
+                                     element: $player},
+                             on: {started: this.onStartedPlaying,
+                                  ended: this.onEndedPlaying}}),
+          (this.isFirstPlay
+           ? h('play-button', {on: {click: this.onPlayClicked}})
+           : this.isPlaying
+           ? h('div', 'Playing...')
+           : h('record-button', {props: {mediaRecorder: this.mediaRecorder},
+                                 on: {recorded: this.onRecorded}}))]))
   },
   methods: {
     onRecorded: function (e) {
       this.recordedAudio = e
+      $player.oncanplay = () => $player.play()
+      this.playUrl = window.URL.createObjectURL(this.recordedAudio.data)
+    },
+    onPlayClicked: function () {
+      console.log('click');
+      $player.play()
+    },
+    onStartedPlaying: function (e) {
+      this.isPlaying = true
+      this.isFirstPlay = false
     },
     onEndedPlaying: function (e) {
-      this.isPlayingServerAudio = false
+      this.isPlaying = false
     }
   }
 })
