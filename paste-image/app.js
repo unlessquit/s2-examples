@@ -20,14 +20,12 @@ var app = new Vue({
     return h(
       'div', {attrs: {id: 'app'},
               on: {paste: this.onPaste}},
-      [
-        this.imageId ?
-          h('div', {attrs: {id: 'image'}}, [
-            h('img', {attrs: {src: this.imageUrl}}),
-            h('br'),
-            h('a', {attrs: {href: this.imageUrl}}, this.imageUrl)
-          ])
-        : h('div', {attrs: {id: 'paste'}}, 'Paste Image')
+      [this.imageId
+       ? h('div', {attrs: {id: 'image'}}, [
+         h('img', {attrs: {src: this.imageUrl}}),
+         h('br'),
+         h('a', {attrs: {href: this.imageUrl}}, this.imageUrl)])
+       : h('div', {attrs: {id: 'paste'}}, 'Paste Image')
       ])
   },
   computed: {
