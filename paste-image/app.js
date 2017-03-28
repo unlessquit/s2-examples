@@ -3,26 +3,6 @@
 
 var s2 = new S2('https://s2.unlessquit.com')
 
-// TODO: Move to s2.js
-S2.prototype.store = function (key, value, options, callback) {
-  var req = new XMLHttpRequest()
-  req.addEventListener('load', function () {
-    if (this.status !== 200) {
-      callback(req, null)
-      return
-    }
-
-    if (callback) {
-      callback(null, this.responseText.trim())
-    }
-  })
-  req.open('PUT', this.serverUrl + key)
-  if (options['content-type']) {
-    req.setRequestHeader('Content-Type', options['content-type'])
-  }
-  req.send(value)
-}
-
 function uuid () {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     var r = Math.random() * 16 | 0
