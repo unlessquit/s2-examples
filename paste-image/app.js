@@ -3,14 +3,6 @@
 
 var s2 = new S2('https://s2.unlessquit.com')
 
-function uuid () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0
-    var v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
-}
-
 var app = new Vue({
   el: '#app',
   data: {
@@ -43,7 +35,7 @@ var app = new Vue({
 
         if (!isSupported) return false
 
-        var dst = '/examples/paste-image/' + uuid() + '.png'
+        var dst = '/examples/paste-image?as=inbox'
         console.log('Going to upload', dst)
         s2.store(
           dst,
