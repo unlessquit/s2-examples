@@ -24,7 +24,7 @@ var app = new Vue({
     imageUrl: function () {
       if (!this.imageId) return null
 
-      return s2url + '/o/' + this.imageId + '/image.png'
+      return s2url + '/o/' + this.imageId
     }
   }
 })
