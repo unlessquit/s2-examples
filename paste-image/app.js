@@ -1,7 +1,8 @@
 /* eslint-env browser */
 /* global Vue, S2 */
 
-var s2 = new S2('https://s2.unlessquit.com')
+var s2url = 'https://s2.unlessquit.com'
+var s2 = new S2(s2url)
 
 var app = new Vue({
   el: '#app',
@@ -23,7 +24,7 @@ var app = new Vue({
     imageUrl: function () {
       if (!this.imageId) return null
 
-      return 'https://s2.unlessquit.com/o/' + this.imageId + '/image.png'
+      return s2url + '/o/' + this.imageId + '/image.png'
     }
   }
 })
