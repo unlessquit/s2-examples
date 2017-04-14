@@ -1,23 +1,44 @@
 <html>
   <head>
     <meta name="viewport" content="initial-scale=1.0">
+    <script src="https://unpkg.com/vue"></script>
     <script type="text/javascript" src="https://s2.unlessquit.com/app/js/s2.js"></script>
     <title>Location Example</title>
     <style type="text/css" media="screen">
-      #map {
+    #map {
         height: 100%;
-      }
+    }
 
-      html, body {
+    #app {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .ts {
+        position: absolute;
+        bottom: 20;
+        background: rgba(66,66,66,0.54);
+        border-radius: 10px;
+        color: white;
+        padding: 10px;
+    }
+
+    html, body {
         height: 100%;
         margin: 0;
         padding: 0;
-      }
+    }
     </style>
   </head>
 
   <body>
     <div id="map"></div>
+    <div id="app"></div>
     <script type="text/javascript" src="./app.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAvm_UJ9rnkOEztQC0iNwz7QEA7VmGEhQ&callback=initMap" async defer></script>
   </body>
